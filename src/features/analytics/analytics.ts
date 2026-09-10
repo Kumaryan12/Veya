@@ -1,10 +1,15 @@
 import { REMINDER_CONFIG } from "../../lib/config";
 import type { SessionSummary, TimelinePoint } from "../../types";
 
-export function rollingBlinkRate(blinkTimestamps: number[], now: number, windowMs = REMINDER_CONFIG.rollingWindowMs): number {
+export function rollingBlinkRate(
+  blinkTimestamps: number[],
+  now: number,
+  windowMs = REMINDER_CONFIG.rollingWindowMs,
+  observedSince = now - windowMs,
+): number {
   const earliest = now - windowMs;
   const count = blinkTimestamps.filter((timestamp) => timestamp >= earliest && timestamp <= now).length;
-  const observedMs = Math.min(windowMs, Math.max(1, now - (blinkTimestamps[0] ?? now)));
+  const observedMs = Math.min(windowMs, Math.max(1_000, now - observedSince));
   return count * (60_000 / observedMs);
 }
 
@@ -40,4 +45,3 @@ export function createSessionSummary(input: {
     timeline: makeTimeline(input.blinkTimestamps, input.startedAt, input.endedAt),
   };
 }
-

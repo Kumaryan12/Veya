@@ -24,7 +24,6 @@ export async function updateOverlay(level: ReminderLevel | "ACKNOWLEDGED"): Prom
       await overlay.show();
     }
   } catch (error) {
-    if (import.meta.env.DEV) console.warn("Overlay bridge unavailable", error);
+    console.warn("Overlay bridge unavailable", error);
   }
 }
-

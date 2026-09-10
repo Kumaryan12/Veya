@@ -75,6 +75,7 @@ export interface MonitorSnapshot {
   reminderCount: number;
   fps: number;
   sessionStartedAt: number | null;
+  timeline: TimelinePoint[];
   errorMessage: string | null;
   simulationMode: SimulationMode | null;
 }
@@ -92,4 +93,3 @@ export interface ReminderInput {
   remindersEnabled: boolean;
   sensitivity: ReminderSensitivity;
 }
-

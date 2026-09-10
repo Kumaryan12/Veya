@@ -34,6 +34,15 @@ export const storage = {
     const sessions = this.getSessions();
     writeJson(STORAGE_KEYS.sessions, [...sessions, session].slice(-90));
   },
+  getActiveSession(): SessionSummary | null {
+    return readJson<SessionSummary | null>(STORAGE_KEYS.activeSession, null);
+  },
+  setActiveSession(session: SessionSummary): void {
+    writeJson(STORAGE_KEYS.activeSession, session);
+  },
+  clearActiveSession(): void {
+    localStorage.removeItem(STORAGE_KEYS.activeSession);
+  },
   isOnboardingComplete(): boolean {
     return localStorage.getItem(STORAGE_KEYS.onboarding) === "complete";
   },
@@ -44,4 +53,3 @@ export const storage = {
     Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
   },
 };
-

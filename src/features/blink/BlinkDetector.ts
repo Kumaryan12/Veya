@@ -12,7 +12,7 @@ export class BlinkDetector {
   private closureStartedAt = 0;
   private lastBlinkAt = -Infinity;
 
-  constructor(private closureThreshold = BLINK_CONFIG.defaultClosureThreshold) {}
+  constructor(private closureThreshold: number = BLINK_CONFIG.defaultClosureThreshold) {}
 
   setThreshold(threshold: number): void {
     this.closureThreshold = threshold;
@@ -76,4 +76,3 @@ export class BlinkDetector {
     return { state: this.state, blinked: false };
   }
 }
-

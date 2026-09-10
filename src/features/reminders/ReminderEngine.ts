@@ -12,14 +12,16 @@ export class ReminderEngine {
   private previousLevel: ReminderLevel = "NONE";
 
   evaluate(input: ReminderInput): ReminderResult {
+    const lastBlinkAt = input.lastBlinkAt;
     const reliable =
-      input.monitoring && input.remindersEnabled && input.faceDetected && input.confidence >= 0.58 && input.lastBlinkAt !== null;
-    if (!reliable || input.now - this.lastReminderAt < REMINDER_CONFIG.cooldownMs) {
+      input.monitoring && input.remindersEnabled && input.faceDetected && input.confidence >= 0.58 && lastBlinkAt !== null;
+    const coolingDown = this.previousLevel === "NONE" && input.now - this.lastReminderAt < REMINDER_CONFIG.cooldownMs;
+    if (!reliable || coolingDown || lastBlinkAt === null) {
       this.previousLevel = "NONE";
       return { score: 0, level: "NONE", newlyTriggered: false };
     }
 
-    const noBlinkMs = input.now - input.lastBlinkAt;
+    const noBlinkMs = input.now - lastBlinkAt;
     const timeScore = Math.max(0, Math.min(1, (noBlinkMs - 5_000) / REMINDER_CONFIG.noBlinkReferenceMs));
     const baseline = Math.max(4, input.baselineBlinkRate);
     const rateDrop = Math.max(0, Math.min(1, (baseline - input.rollingBlinkRate) / baseline));
@@ -42,4 +44,3 @@ export class ReminderEngine {
     this.lastReminderAt = -Infinity;
   }
 }
-

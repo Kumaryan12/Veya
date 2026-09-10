@@ -1,6 +1,6 @@
 export const BLINK_CONFIG = {
   inferenceIntervalMs: 66,
-  smoothingWindow: 4,
+  smoothingWindow: 3,
   defaultClosureThreshold: 0.19,
   minimumClosureMs: 66,
   maximumBlinkDurationMs: 800,
@@ -39,6 +39,6 @@ export const STORAGE_KEYS = {
   settings: "veya.settings.v1",
   calibration: "veya.calibration.v1",
   sessions: "veya.sessions.v1",
+  activeSession: "veya.active-session.v1",
   onboarding: "veya.onboarding.v1",
 } as const;
-

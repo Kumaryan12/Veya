@@ -15,6 +15,7 @@ const INITIAL_SNAPSHOT: MonitorSnapshot = {
   reminderCount: 0,
   fps: 0,
   sessionStartedAt: null,
+  timeline: [],
   errorMessage: null,
   simulationMode: null,
 };
@@ -48,4 +49,3 @@ export const monitorStore = new MonitorStore();
 export function useMonitorSnapshot(): MonitorSnapshot {
   return useSyncExternalStore(monitorStore.subscribe, monitorStore.getSnapshot, monitorStore.getSnapshot);
 }
-

@@ -1,4 +1,4 @@
-import { createSessionSummary, rollingBlinkRate } from "../analytics/analytics";
+import { createSessionSummary, makeTimeline, rollingBlinkRate } from "../analytics/analytics";
 import { BlinkDetector } from "../blink/BlinkDetector";
 import { CameraError, CameraService } from "../camera/CameraService";
 import { calculateEyeMetrics, EyeMetricSmoother } from "../face/eyeOpenness";
@@ -29,11 +29,16 @@ class MonitoringService {
   private paused = false;
   private blinkTimestamps: number[] = [];
   private sessionStartedAt: number | null = null;
-  private lastReliableEyesAt = 0;
   private listeners = new Set<MetricListener>();
   private settings: VeyaSettings = storage.getSettings();
   private simulationTimer: number | null = null;
   private simulationStartedAt = 0;
+  private startPromise: Promise<void> | null = null;
+  private lastPersistAt = 0;
+
+  constructor() {
+    window.addEventListener("beforeunload", () => this.finishSession());
+  }
 
   setCalibration(profile: CalibrationProfile | null): void {
     this.detector.setThreshold(profile?.closureThreshold ?? BLINK_CONFIG.defaultClosureThreshold);
@@ -61,11 +66,27 @@ class MonitoringService {
       monitorStore.update({ status: "monitoring" });
       return;
     }
+    if (this.startPromise) return this.startPromise;
+    this.startPromise = this.startInternal();
+    try {
+      await this.startPromise;
+    } finally {
+      this.startPromise = null;
+    }
+  }
+
+  private async startInternal(): Promise<void> {
     this.stopSimulation();
     monitorStore.update({ status: "starting", errorMessage: null });
     try {
       const [video] = await Promise.all([this.camera.start(), this.face.load()]);
       this.video = video;
+      if (video.srcObject instanceof MediaStream) {
+        video.srcObject.getVideoTracks()[0]?.addEventListener("ended", () => {
+          monitorStore.update({ status: "camera-unavailable", errorMessage: "The camera disconnected. Reconnect it, then try again." });
+          this.pause();
+        }, { once: true });
+      }
       this.beginSession();
       this.running = true;
       this.paused = false;
@@ -74,7 +95,9 @@ class MonitoringService {
       this.camera.stop();
       this.face.close();
       const status = error instanceof CameraError ? (error.kind === "denied" ? "camera-denied" : "camera-unavailable") : "model-error";
-      const message = error instanceof Error ? error.message : "Veya could not start local eye tracking.";
+      const message = error instanceof CameraError
+        ? error.message
+        : "Veya’s local face model couldn’t start. Restart the app and try again.";
       monitorStore.update({ status, errorMessage: message });
       throw error;
     }
@@ -92,7 +115,6 @@ class MonitoringService {
       return;
     }
     this.paused = false;
-    this.lastReliableEyesAt = performance.now();
     monitorStore.update({ status: "monitoring" });
   }
 
@@ -151,9 +173,11 @@ class MonitoringService {
   }
 
   private beginSession(): void {
+    const interrupted = storage.getActiveSession();
+    if (interrupted && interrupted.durationSeconds >= 10) storage.addSession(interrupted);
+    storage.clearActiveSession();
     this.sessionStartedAt = Date.now();
     this.blinkTimestamps = [];
-    this.lastReliableEyesAt = performance.now();
     this.reminder.resetCooldown();
     monitorStore.update({
       status: "monitoring",
@@ -162,6 +186,7 @@ class MonitoringService {
       reminderCount: 0,
       longestNoBlinkSeconds: 0,
       lastBlinkAt: null,
+      timeline: [],
     });
   }
 
@@ -180,6 +205,7 @@ class MonitoringService {
         }),
       );
     }
+    storage.clearActiveSession();
     this.sessionStartedAt = null;
   }
 
@@ -220,7 +246,6 @@ class MonitoringService {
   private processMetrics(metrics: EyeMetrics | null, now: number): void {
     this.listeners.forEach((listener) => listener(metrics));
     const reliable = Boolean(metrics && metrics.confidence >= BLINK_CONFIG.minimumConfidence);
-    if (reliable) this.lastReliableEyesAt = now;
     const blink = this.detector.update(reliable ? metrics : null, now);
     const snapshot = monitorStore.getSnapshot();
 
@@ -237,9 +262,9 @@ class MonitoringService {
     const wallNow = Date.now();
     const lastBlinkAt = blink.blinked ? wallNow : snapshot.lastBlinkAt;
     const sinceBlink = lastBlinkAt ? (wallNow - lastBlinkAt) / 1_000 : 0;
-    const rate = rollingBlinkRate(this.blinkTimestamps, wallNow);
-    const calibration = storage.getCalibration();
-    const baselineRate = Math.max(10, storage.getSessions().slice(-5).reduce((sum, session) => sum + session.averageBlinkRate, 0) / Math.max(1, storage.getSessions().slice(-5).length));
+    const rate = rollingBlinkRate(this.blinkTimestamps, wallNow, undefined, this.sessionStartedAt ?? wallNow);
+    const recentSessions = storage.getSessions().slice(-5);
+    const baselineRate = Math.min(25, Math.max(10, recentSessions.reduce((sum, session) => sum + session.averageBlinkRate, 0) / Math.max(1, recentSessions.length)));
     const reminderResult = this.reminder.evaluate({
       now: wallNow,
       lastBlinkAt,
@@ -259,6 +284,9 @@ class MonitoringService {
     if (now - this.lastUiUpdateAt >= 180 || blink.blinked || !reliable) {
       this.lastUiUpdateAt = now;
       const status = !reliable ? (metrics ? "low-confidence" : "no-face") : "monitoring";
+      const timeline = this.sessionStartedAt ? makeTimeline(this.blinkTimestamps, this.sessionStartedAt, wallNow) : [];
+      const nextLongest = Math.max(snapshot.longestNoBlinkSeconds, sinceBlink);
+      const nextReminderCount = snapshot.reminderCount + (reminderResult.newlyTriggered ? 1 : 0);
       monitorStore.update({
         status,
         faceDetected: reliable,
@@ -267,16 +295,27 @@ class MonitoringService {
         blinkCount: this.blinkTimestamps.length,
         lastBlinkAt,
         rollingBlinkRate: rate,
-        longestNoBlinkSeconds: Math.max(snapshot.longestNoBlinkSeconds, sinceBlink),
+        longestNoBlinkSeconds: nextLongest,
         reminderScore: reminderResult.score,
         reminderLevel: blink.blinked ? "NONE" : reminderResult.level,
-        reminderCount: snapshot.reminderCount + (reminderResult.newlyTriggered ? 1 : 0),
+        reminderCount: nextReminderCount,
         fps: this.fps,
+        timeline,
         errorMessage: null,
       });
+      if (this.sessionStartedAt && !snapshot.simulationMode && wallNow - this.lastPersistAt >= 10_000) {
+        storage.setActiveSession(createSessionSummary({
+          id: `active-${this.sessionStartedAt}`,
+          startedAt: this.sessionStartedAt,
+          endedAt: wallNow,
+          blinkTimestamps: this.blinkTimestamps,
+          longestNoBlinkSeconds: nextLongest,
+          reminderCount: nextReminderCount,
+        }));
+        this.lastPersistAt = wallNow;
+      }
     }
   }
 }
 
 export const monitoringService = new MonitoringService();
-
