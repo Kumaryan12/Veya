@@ -2,6 +2,8 @@
 
 A privacy-first desktop companion that gently reminds you to blink while you work.
 
+Veya also ships as an installable web app. The same camera, MediaPipe, calibration, blink detection, reminders, and local analytics pipeline runs entirely in the browser; no application server receives camera data.
+
 Veya uses on-device face landmarks to notice changes in a person’s natural blink rhythm. When blinking becomes unusually infrequent, a small always-on-top capsule appears near the webcam. A detected blink acknowledges and dismisses it immediately.
 
 Veya is a screen-wellbeing companion, not a medical device. It does not diagnose, prevent, or treat eye strain, dry eye, fatigue, or any other condition.
@@ -16,6 +18,7 @@ Veya is a screen-wellbeing companion, not a medical device. It does not diagnose
 - Confidence gating for no face, partial face, head turn, and unstable eyes
 - A scored reminder engine based on no-blink time, relative rate drop, personal history, confidence, and cooldown
 - A dedicated top-center, borderless Tauri overlay window
+- A browser-native top-center reminder and offline-capable PWA shell
 - Local session statistics, rolling rate, history, and rhythm timeline
 - Pause/resume, sensitivity, appearance, recalibration, and genuine local-data deletion
 - Light, dark, and system appearance modes with reduced-motion support
@@ -112,6 +115,8 @@ Run the frontend in a browser for layout and simulation work:
 npm run dev
 ```
 
+For real camera access in a browser, open the printed localhost URL or deploy over HTTPS. Complete onboarding normally and keep the Veya tab visible while monitoring.
+
 Run the complete desktop app:
 
 ```bash
@@ -119,6 +124,13 @@ npm run tauri dev
 ```
 
 Open `http://localhost:1420/?debug=true&demo=true` during frontend development to bypass onboarding with simulated normal blinking. The debug panel can also be toggled with <kbd>Cmd/Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> after onboarding. It provides controls for a blink, normal rhythm, no face, prolonged staring, and low confidence.
+
+The two build targets remain separate:
+
+```bash
+npm run build          # hosted web app / Cloudflare Worker output
+npm run build:desktop  # Tauri-compatible static frontend
+```
 
 Quality checks:
 
@@ -168,6 +180,7 @@ Reminder decisions combine elapsed time since the last blink, the drop from rece
 
 - Webcam and reminder behavior vary with lighting, glasses, camera angle, and individual anatomy; recalibration and manual sensitivity tuning may be needed.
 - V1 uses the main display for initial overlay placement. Following an active window between monitors is a future enhancement.
+- A webpage cannot stay above other applications. Browser reminders are visible while Veya’s page or installed PWA is visible; use the desktop build for a system-level overlay.
 - Inference runs on the main webview thread. The cadence is capped and UI updates are throttled, but a worker/OffscreenCanvas path would improve headroom on older machines.
 - The overlay uses Tauri’s supported transparent-window configuration; on macOS this enables Tauri’s `macos-private-api` feature. Windows transparency and focus behavior require platform QA.
 - Closing the main window exits the app in V1. Minimize it to keep monitoring active.
@@ -191,4 +204,3 @@ Keep Veya local, calm, and narrowly focused. Before opening a pull request, run 
 ## License
 
 MIT is recommended and included in [LICENSE](LICENSE). MediaPipe Tasks Vision is distributed under its own Apache-2.0 terms, and the bundled model/runtime should retain upstream notices in release packaging.
-

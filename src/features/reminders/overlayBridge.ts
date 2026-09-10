@@ -4,7 +4,7 @@ export interface OverlayPayload {
   level: ReminderLevel | "ACKNOWLEDGED";
 }
 
-function isTauri(): boolean {
+export function isTauri(): boolean {
   return "__TAURI_INTERNALS__" in window;
 }
 

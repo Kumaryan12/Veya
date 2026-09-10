@@ -7,6 +7,8 @@ import { StatusPill } from "../components/StatusPill";
 import { CalibrationPanel } from "../features/calibration/CalibrationPanel";
 import { DebugPanel } from "../features/debug/DebugPanel";
 import { monitoringService } from "../features/monitoring/MonitoringService";
+import { isTauri } from "../features/reminders/overlayBridge";
+import { WebReminder } from "../features/reminders/WebReminder";
 import { SettingsPanel } from "../features/settings/SettingsPanel";
 import { storage } from "../lib/storage";
 import { useMonitorSnapshot } from "../stores/monitorStore";
@@ -80,6 +82,7 @@ export function Dashboard() {
 
   return (
     <main className="app-shell">
+      {!isTauri() && <WebReminder snapshot={snapshot} />}
       <header className="app-header" data-tauri-drag-region>
         <Brand compact />
         <div className="header-actions">

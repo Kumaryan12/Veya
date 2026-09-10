@@ -5,6 +5,7 @@ import { Brand, EyeGlyph } from "../components/Brand";
 import { Button } from "../components/Button";
 import { CalibrationPanel } from "../features/calibration/CalibrationPanel";
 import { monitoringService } from "../features/monitoring/MonitoringService";
+import { isTauri } from "../features/reminders/overlayBridge";
 import { storage } from "../lib/storage";
 import type { CalibrationProfile } from "../types";
 
@@ -52,7 +53,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <div className="hero-eyes"><EyeGlyph size={92} /></div>
             <p className="eyebrow">meet veya</p>
             <h1>A quiet reminder<br />for your eyes.</h1>
-            <p className="lede">A tiny desktop companion that notices prolonged staring and gently reminds you to blink.</p>
+            <p className="lede">A tiny {isTauri() ? "desktop" : "screen"} companion that notices prolonged staring and gently reminds you to blink.</p>
             <Button onClick={() => setStep(1)}>Begin <span aria-hidden="true">→</span></Button>
           </motion.section>
         )}
@@ -95,4 +96,3 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     </main>
   );
 }
-

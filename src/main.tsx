@@ -10,3 +10,6 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>{isOverlay ? <Overlay /> : <App />}</StrictMode>,
 );
 
+if (!("__TAURI_INTERNALS__" in window) && "serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => void navigator.serviceWorker.register("/sw.js"));
+}
