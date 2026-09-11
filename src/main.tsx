@@ -2,12 +2,15 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { Overlay } from "./features/reminders/Overlay";
+import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import "./styles/index.css";
 
 const isOverlay = new URLSearchParams(window.location.search).get("overlay") === "true";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>{isOverlay ? <Overlay /> : <App />}</StrictMode>,
+  <StrictMode>
+    <AppErrorBoundary>{isOverlay ? <Overlay /> : <App />}</AppErrorBoundary>
+  </StrictMode>,
 );
 
 if (!("__TAURI_INTERNALS__" in window) && "serviceWorker" in navigator && import.meta.env.PROD) {

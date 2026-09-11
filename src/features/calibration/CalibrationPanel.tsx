@@ -89,9 +89,9 @@ export function CalibrationPanel({ onComplete, onCancel }: CalibrationPanelProps
 
   return (
     <section className="calibration-panel" aria-live="polite">
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {phase === "open" && (
-          <motion.div key="open" className="calibration-content" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+          <motion.div key="open" className="calibration-content" initial={false} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <div className="calibration-eye"><EyeGlyph active={false} size={72} /></div>
             <p className="eyebrow">calibration · 1 of 2</p>
             <h2>Let’s learn your eyes.</h2>
@@ -101,7 +101,7 @@ export function CalibrationPanel({ onComplete, onCancel }: CalibrationPanelProps
           </motion.div>
         )}
         {phase === "blink" && (
-          <motion.div key="blink" className="calibration-content" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+          <motion.div key="blink" className="calibration-content" initial={false} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <div className="calibration-eye"><EyeGlyph active size={72} /></div>
             <p className="eyebrow">calibration · 2 of 2</p>
             <h2>Blink naturally three times.</h2>
@@ -113,7 +113,7 @@ export function CalibrationPanel({ onComplete, onCancel }: CalibrationPanelProps
           </motion.div>
         )}
         {phase === "complete" && (
-          <motion.div key="complete" className="calibration-content" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}>
+          <motion.div key="complete" className="calibration-content" initial={false} animate={{ opacity: 1, scale: 1 }}>
             <div className="success-orb"><Check size={28} /></div>
             <p className="eyebrow">calibrated</p>
             <h2>That’s all we needed.</h2>
@@ -121,7 +121,7 @@ export function CalibrationPanel({ onComplete, onCancel }: CalibrationPanelProps
           </motion.div>
         )}
         {phase === "failed" && (
-          <motion.div key="failed" className="calibration-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div key="failed" className="calibration-content" initial={false} animate={{ opacity: 1 }}>
             <div className="calibration-eye"><RotateCcw size={32} /></div>
             <p className="eyebrow">let’s try once more</p>
             <h2>We lost the rhythm.</h2>

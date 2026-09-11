@@ -91,7 +91,7 @@ export function Dashboard() {
         </div>
       </header>
 
-      <motion.section className="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <motion.section className="dashboard" initial={false} animate={{ opacity: 1 }}>
         {recoverableError ? (
           <div className="error-state">
             <div className="feature-icon"><ShieldCheck size={28} /></div>

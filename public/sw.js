@@ -1,4 +1,4 @@
-const CACHE_NAME = "veya-web-v1";
+const CACHE_NAME = "veya-web-v2";
 const CORE_ASSETS = [
   "/",
   "/manifest.webmanifest",
