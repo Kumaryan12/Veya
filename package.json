@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "dev:desktop": "vite --mode desktop",
-    "build": "tsc -b && vite build",
-    "build:desktop": "tsc -b && vite build --mode desktop",
+    "build": "tsc -b && node scripts/clean-dist.mjs && vite build",
+    "build:desktop": "tsc -b && node scripts/clean-dist.mjs && vite build --mode desktop",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
