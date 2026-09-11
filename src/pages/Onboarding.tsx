@@ -44,9 +44,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   return (
     <main className="onboarding-shell">
       <div className="onboarding-top"><Brand /></div>
-      <div className="step-indicator" aria-label={`Step ${step + 1} of 5`}>
-        {[0, 1, 2, 3, 4].map((item) => <span key={item} className={item <= step ? "active" : ""} />)}
-      </div>
       <AnimatePresence mode="wait" initial={false}>
         {step === 0 && (
           <motion.section className="onboarding-card" key="welcome" initial={false} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
@@ -93,6 +90,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </motion.section>
         )}
       </AnimatePresence>
+      <div className="step-indicator" aria-label={`Step ${step + 1} of 5`}>
+        {[0, 1, 2, 3, 4].map((item) => <span key={item} className={item <= step ? "active" : ""} />)}
+      </div>
     </main>
   );
 }

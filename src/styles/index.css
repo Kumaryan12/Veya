@@ -87,8 +87,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 /* Onboarding */
 .onboarding-shell { display: grid; grid-template-rows: 74px 1fr 56px; position: relative; }
-.onboarding-top { padding: 27px 34px 0; }
-.onboarding-card { width: min(620px, calc(100vw - 48px)); min-height: 520px; margin: auto; padding: 44px 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.onboarding-top { grid-row: 1; padding: 27px 34px 0; }
+.onboarding-card { grid-row: 2; width: min(620px, calc(100vw - 48px)); min-height: 520px; margin: auto; padding: 44px 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .hero-eyes, .feature-icon, .calibration-eye, .success-orb { color: var(--accent-strong); margin-bottom: 28px; }
 .hero-eyes { width: 126px; height: 92px; border-radius: 48%; background: var(--accent-soft); display: grid; place-items: center; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent); }
 .feature-icon, .calibration-eye { width: 70px; height: 70px; border-radius: 25px; background: var(--accent-soft); display: grid; place-items: center; }
@@ -98,7 +98,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .privacy-row { display: flex; gap: 10px; align-items: center; color: var(--muted); font-size: 13px; margin: -12px 0 30px; padding: 11px 15px; border: 1px solid var(--border); border-radius: 12px; }
 .microcopy { margin-top: 16px; display: flex; align-items: center; gap: 7px; color: var(--muted); }
 .inline-error { max-width: 470px; margin: -12px 0 22px; padding: 12px 15px; border-radius: 12px; background: color-mix(in srgb, #b85a50 9%, transparent); color: #a74f47; font-size: 13px; line-height: 1.45; }
-.step-indicator { align-self: end; justify-self: center; display: flex; gap: 8px; padding-bottom: 26px; }
+.step-indicator { grid-row: 3; align-self: end; justify-self: center; display: flex; gap: 8px; padding-bottom: 26px; }
 .step-indicator span { width: 6px; height: 6px; border-radius: 999px; background: var(--border-strong); transition: width .35s ease, background .35s ease; }
 .step-indicator span.active { width: 24px; background: var(--accent); }
 
